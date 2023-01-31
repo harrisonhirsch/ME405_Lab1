@@ -1,4 +1,5 @@
 import pyb
+
 """!
     @file                       encoder_reader.py
     @brief                      A driver for reading from Quadrature Encoders
@@ -92,3 +93,10 @@ class EncoderReader:
         """
         self.position = position
         self.delta = 0
+        
+if __name__ == '__main__':
+    encoder1 = encoder_reader.EncoderReader(pyb.Pin.cpu.C6, pyb.Pin.cpu.C7, 8)
+    encoder2 = encoder_reader.EncoderReader(pyb.Pin.cpu.B6, pyb.Pin.cpu.B7, 4)
+    while True:
+        value1 = encoder1.read()
+        value2 = encoder2.read()

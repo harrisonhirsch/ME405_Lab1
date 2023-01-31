@@ -1,43 +1,70 @@
 import pyb
-
+"""!
+    @file                       motor_driver.py
+    @brief                      This class implements a DC motor driver for an ME405 kit.
+    @details                    This is a driver for interfacing with a brushed DC motor through
+                                the L6206 motor "shield" or "hat" for the ME 405 kit.
+                                
+    @author                     Peyton Archibald
+    @author                     Harrison Hirsch
+    @date                       January 31, 2023
+"""
 
 class MotorDriver:
     """!
-    This class implements a motor driver for an ME405 kit.
+    @brief                      This class implements a DC motor driver for an ME405 kit.
+    @details                    This is a driver for interfacing with a brushed DC motor through
+                                the L6206 motor "shield" or "hat" for the ME 405 kit.
     """
 
     def __init__(self, en_pin, in1pin, in2pin, timer):
         """!
-        Creates a motor driver by initializing GPIO
-        pins and turning off the motor for safety.
-        @param en_pin (There will be several pin parameters)
-        """
+            @brief              Constructs an motor object
+            @details            Upon instantiation, the motor object is created with the input parameters
+                                of the timer and input pins which the motor driver uses to control the
+                                speed of the motor using a PWM signal. Additionally, upon instantiation,
+                                the enable pin for the motor controler is set to high, enabling the motor
+                                for use.
+            @param  en_pin      The enable pin which is used to enable the motor controler
+            @param  in1pin      The pin 1 for the motor
+            @param  in2pin      The pin 2 for the  
+        """  
+
+        
         print("Creating a motor driver")
-        self.enable_pin = en_pin
+        
+        self.enable_pin = en_pin 	#Seting up the enable pin, and setting it high
         self.enable_pin.init(pyb.Pin.OUT_OD, pyb.Pin.PULL_UP)
         self.enable_pin.high()
-        self.input1pin = in1pin
+        
+        self.input1pin = in1pin 	#Defining the pin 1 of the motor
         self.input1pin.init(pyb.Pin.OUT_PP)
-        self.input2pin = in2pin
+        
+        self.input2pin = in2pin		#Defining the pin 2 of the motor
         self.input2pin.init(pyb.Pin.OUT_PP)
-        self.motortimer = pyb.Timer(timer, freq=20000)
-        self.CCW = self.motortimer.channel(1, pyb.Timer.PWM, pin=in1pin)
+        
+        self.motortimer = pyb.Timer(timer, freq=20000) 	#Seting up the timer channel for PWM signal
+        self.CCW = self.motortimer.channel(1, pyb.Timer.PWM, pin=in1pin)  #Setting up channels for motor
         self.CW = self.motortimer.channel(2, pyb.Timer.PWM, pin=in2pin)
 
     def set_duty_cycle(self, level):
         """!
-        This method sets the duty cycle to be sent
-        to the motor to the given level. Positive values
-        cause torque in one direction, negative values
-        in the opposite direction.
-        @param level A signed integer holding the duty
-               cycle of the voltage sent to the motor
+            @brief 				Sets the duty cycle of the PWM signal to a motor
+            @details			This method sets the duty cycle to be sent to the motor to the given
+                                level. Positive values cause torque in one direction, negative values
+                                in the opposite direction.
+            @param level		A signed integer holding the duty cycle of the voltage sent to the motor
         """
         print(f"Setting duty cycle to {level}")
+        
+        #This below section of code is for determining if the duty cycle is saturated
+        #and needs to be set to 100
         if level > 100:
             level = 100
         elif level < -100:
             level = -100
+        #Then the sign of the level determines the direction and magnitude determines power
+        #If zero or anything else is passed in, the motor is stopped.
         if -100 <= level < 0:
             self.CW.pulse_width_percent(-level)
             self.CCW.pulse_width_percent(0)
